@@ -90,6 +90,7 @@ public final class ReciterService: ObservableObject {
         
         // If no reciters loaded from JSON, use the embedded data as fallback
         if !loadedFromJSON {
+            AppLogger.shared.warn("ReciterService: No reciters loaded from JSON files, using embedded fallback data", category: .network)
             for reciterData in ReciterDataProvider.reciters {
                 let info = ReciterInfo(
                     id: reciterData.id,
@@ -107,13 +108,21 @@ public final class ReciterService: ObservableObject {
         
         self.availableReciters = reciters
         
+        AppLogger.shared.info("ReciterService: Loaded \(reciters.count) reciters", category: .network)
+        
         // Load saved reciter from AppStorage or use first available as default
         if savedReciterId > 0, let saved = reciters.first(where: { $0.id == savedReciterId }) {
             self.selectedReciter = saved
+            AppLogger.shared.info("ReciterService: Selected saved reciter: \(saved.displayName) (ID: \(saved.id))", category: .network)
         } else if let firstReciter = reciters.first {
             // Set first reciter as default
             self.selectedReciter = firstReciter
             self.savedReciterId = firstReciter.id
+            AppLogger.shared.info("ReciterService: Selected default reciter: \(firstReciter.displayName) (ID: \(firstReciter.id))", category: .network)
+        }
+        
+        if let selectedReciter = self.selectedReciter {
+            AppLogger.shared.info("ReciterService: Audio base URL: \(selectedReciter.folderURL)", category: .network)
         }
         
         self.isLoading = false

@@ -414,6 +414,10 @@ public final class QuranPlayerViewModel: ObservableObject {
 
         let chapterPathComponent = String(format: "%03d.mp3", chapterNumber)
         let audioURL = baseURL.appendingPathComponent(chapterPathComponent)
+        
+        // Log the URL for debugging
+        AppLogger.shared.info("QuranPlayer: Loading audio from URL: \(audioURL.absoluteString)", category: .network)
+        
         let asset = AVURLAsset(url: audioURL)
         let playerItem = AVPlayerItem(asset: asset)
 

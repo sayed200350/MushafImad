@@ -203,7 +203,11 @@ Call `await QuranImageProvider.shared.resetImageBaseURLToDefault()` to return to
 
 ## Example Project
 
-The `Example` directory contains a minimal SwiftUI app that imports the package and displays `MushafView`. Open `Example/Example.xcodeproj` to experiment with the reader, swap reciters, or tweak theming. Demos include:
+The `Example` directory contains a minimal SwiftUI app that imports the package and displays `MushafView`. Open `Example/Example.xcodeproj` to experiment with the reader, swap reciters, or tweak theming.
+
+> **⚠️ Important:** The Example app requires network permissions to download images and audio. See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for setup instructions if you encounter network errors.
+
+Demos include:
 
 - **Quick Start** – Open the Mushaf with sensible defaults.
 - **Suras List** – Browse every chapter, jump to its first page, and use `onPageTap` to toggle the navigation chrome.
@@ -279,6 +283,15 @@ import AppKit
 - Run `swift build` to verify compilation on macOS.
 - Run unit tests with `swift test` (tests are currently scaffolding; add coverage as new features land).
 - Test on both Intel and Apple Silicon Macs for architecture compatibility.
+
+## Troubleshooting
+
+If you encounter issues with:
+- Audio playback not working ("server hostname not found")
+- Images not loading
+- Network connectivity errors
+
+Please refer to the comprehensive [TROUBLESHOOTING.md](TROUBLESHOOTING.md) guide for solutions and configuration steps.
 
 ## Contributing
 
