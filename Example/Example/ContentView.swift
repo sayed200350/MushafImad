@@ -13,70 +13,74 @@ struct ContentView: View {
     @EnvironmentObject private var reciterService: ReciterService
     
     var body: some View {
-        NavigationStack {
-            List {
-                Section("Quick Start") {
-                    NavigationLink("Suras List") {
-                        SuraList()
-                            .environmentObject(reciterService)
-                            .environmentObject(toastManager)
+        ZStack {
+            NavigationStack {
+                List {
+                    Section("Quick Start") {
+                        NavigationLink("Suras List") {
+                            SuraList()
+                                .environmentObject(reciterService)
+                                .environmentObject(toastManager)
+                        }
+                        NavigationLink("Read the Mushaf") {
+                            MushafReaderDemo()
+                                .environmentObject(reciterService)
+                                .environmentObject(toastManager)
+                        }
                     }
-                    NavigationLink("Read the Mushaf") {
-                        MushafReaderDemo()
-                            .environmentObject(reciterService)
-                            .environmentObject(toastManager)
+                    
+                    Section("Customization") {
+                        NavigationLink("Override Colors & Images") {
+                            CustomBrandingDemo()
+                                .environmentObject(reciterService)
+                                .environmentObject(toastManager)
+                        }
+                        NavigationLink("Inject Your Own Toasts") {
+                            ToastDemo()
+                                .environmentObject(toastManager)
+                        }
+                    }
+                    
+                    Section("Audio") {
+                        NavigationLink("Audio Player UI") {
+                            AudioPlayerDemo()
+                                .environmentObject(reciterService)
+                                .environmentObject(toastManager)
+                        }
+                        NavigationLink("Verse by Verse Playback") {
+                            VerseByVerseDemo()
+                                .environmentObject(reciterService)
+                                .environmentObject(toastManager)
+                        }
+                    }
+                    
+                    Section("Downloads") {
+                        NavigationLink("Download Management") {
+                            DownloadManagerDemo()
+                                .environmentObject(toastManager)
+                        }
+                    }
+                    
+                    Section("Helpful Links") {
+                        Link("View README", destination: URL(string: "https://github.com/ibo2001/MushafImad")!)
                     }
                 }
-                
-                Section("Customization") {
-                    NavigationLink("Override Colors & Images") {
-                        CustomBrandingDemo()
-                            .environmentObject(reciterService)
-                            .environmentObject(toastManager)
+                .navigationTitle("MushafImad Examples")
+                .listStyle(.insetGrouped)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button {
+                            toastManager.show(
+                                .success(message: "Triggered from the top-level toolbar.")
+                            )
+                        } label: {
+                            Label("Show Toast", systemImage: "sparkles")
+                        }
                     }
-                    NavigationLink("Inject Your Own Toasts") {
-                        ToastDemo()
-                            .environmentObject(toastManager)
-                    }
-                }
-                
-                Section("Audio") {
-                    NavigationLink("Audio Player UI") {
-                        AudioPlayerDemo()
-                            .environmentObject(reciterService)
-                            .environmentObject(toastManager)
-                    }
-                    NavigationLink("Verse by Verse Playback") {
-                        VerseByVerseDemo()
-                            .environmentObject(reciterService)
-                            .environmentObject(toastManager)
-                    }
-                }
-                
-                Section("Downloads") {
-                    NavigationLink("Download Management") {
-                        DownloadManagerDemo()
-                            .environmentObject(toastManager)
-                    }
-                }
-                
-                Section("Helpful Links") {
-                    Link("View README", destination: URL(string: "https://github.com/ibo2001/MushafImad")!)
                 }
             }
-            .navigationTitle("MushafImad Examples")
-            .listStyle(.insetGrouped)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        toastManager.show(
-                            .success(message: "Triggered from the top-level toolbar.")
-                        )
-                    } label: {
-                        Label("Show Toast", systemImage: "sparkles")
-                    }
-                }
-            }
+        
+            ToastOverlayView()
         }
     }
 }

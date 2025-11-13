@@ -58,7 +58,12 @@ public final class Chapter: Object, Identifiable {
     }
     
     public var displayTitle: String {
-        let preferredLanguage = Locale.current.language.languageCode?.identifier ?? "en"
+        let preferredLanguage: String
+        if #available(macOS 13.0, iOS 16.0, *) {
+            preferredLanguage = Locale.current.language.languageCode?.identifier ?? "en"
+        } else {
+            preferredLanguage = Locale.current.languageCode ?? "en"
+        }
         return preferredLanguage == "ar" ? arabicTitle : englishTitle
     }
 }

@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
 
 extension UITabBarController {
     var height: CGFloat {
@@ -28,17 +30,18 @@ extension UIApplication {
     }
 }
 
+private extension UIEdgeInsets {
+    var swiftUiInsets: EdgeInsets {
+        EdgeInsets(top: top, leading: left, bottom: bottom, trailing: right)
+    }
+}
+#endif
+
 /// EnvironmentKey for Safe Area Insets.
 /// DO NOT access UIKit from here; only provide a default of `.zero`.
 private struct SafeAreaInsetsKey: EnvironmentKey {
     static var defaultValue: EdgeInsets {
         EdgeInsets()
-    }
-}
-
-private extension UIEdgeInsets {
-    var swiftUiInsets: EdgeInsets {
-        EdgeInsets(top: top, leading: left, bottom: bottom, trailing: right)
     }
 }
 
@@ -56,9 +59,11 @@ struct SafeAreaInsetsInjector: ViewModifier {
     func body(content: Content) -> some View {
         content
             .onAppear {
+                #if canImport(UIKit)
                 if let window = UIApplication.shared.keyWindow {
                     self.insets = window.safeAreaInsets.swiftUiInsets
                 }
+                #endif
             }
             .environment(\.safeAreaInsets, insets)
     }

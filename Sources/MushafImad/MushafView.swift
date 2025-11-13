@@ -271,10 +271,13 @@ public struct MushafView: View {
 #Preview {
     NavigationStack {
         MushafView(initialPage: 2, highlightedVerse: nil)
+        #if os(iOS) || os(visionOS)
             .navigationBarTitleDisplayMode(.inline)
+        #endif
     }
     .environmentObject(ReciterService.shared)
     .environmentObject(ToastManager())
     .environment(\.layoutDirection, .leftToRight)
     //.environment(\.locale, Locale(identifier: "ar_SA"))
 }
+

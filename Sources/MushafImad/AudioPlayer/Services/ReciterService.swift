@@ -32,7 +32,12 @@ public final class ReciterService: ObservableObject {
         /// Localized name depending on the current locale.
         public var displayName: String {
             // Check current locale to determine which name to show
-            let preferredLanguage = Locale.current.language.languageCode?.identifier ?? "en"
+            let preferredLanguage: String
+            if #available(macOS 13.0, iOS 16.0, *) {
+                preferredLanguage = Locale.current.language.languageCode?.identifier ?? "en"
+            } else {
+                preferredLanguage = Locale.current.languageCode ?? "en"
+            }
             return preferredLanguage == "ar" ? nameArabic : nameEnglish
         }
         
