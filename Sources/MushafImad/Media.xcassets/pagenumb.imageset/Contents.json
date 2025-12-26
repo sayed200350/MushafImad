@@ -3,16 +3,6 @@
     {
       "filename" : "pagenumb.svg",
       "idiom" : "universal"
-    },
-    {
-      "appearances" : [
-        {
-          "appearance" : "luminosity",
-          "value" : "dark"
-        }
-      ],
-      "filename" : "pagenumb-dark.svg",
-      "idiom" : "universal"
     }
   ],
   "info" : {

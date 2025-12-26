@@ -3,16 +3,6 @@
     {
       "filename" : "fasel.svg",
       "idiom" : "universal"
-    },
-    {
-      "appearances" : [
-        {
-          "appearance" : "luminosity",
-          "value" : "dark"
-        }
-      ],
-      "filename" : "fasel-dark.svg",
-      "idiom" : "universal"
     }
   ],
   "info" : {
