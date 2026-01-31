@@ -19,6 +19,13 @@
   </a>
 </p>
 
+<div align="center">
+  <h3>✨ Proud Participant in <a href="https://github.com/Ramadan-Impact">Ramadan Impact</a> ✨</h3>
+  <p><i>An initiative by the Itqan Community to elevate open-source Islamic software.</i></p>
+</div>
+
+---
+
 
 # MushafImad
 
@@ -304,10 +311,8 @@ Please refer to the comprehensive [TROUBLESHOOTING.md](TROUBLESHOOTING.md) guide
 
 ## Contributing
 
-1. Fork and create a feature branch.
-2. Add tests and documentation for changes.
-3. Run `swift test` and lint your SwiftUI views.
-4. Submit a pull request describing the update.
+We are actively seeking contributors for the **Ramadan Impact** campaign!
+Please read our **[CONTRIBUTING.md](CONTRIBUTING.md)** guide specifically designed to help you get started quickly and follow our contribution workflow.
 
 ---
 
