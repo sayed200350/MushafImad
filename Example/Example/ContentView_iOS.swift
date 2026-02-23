@@ -88,7 +88,7 @@ struct ContentView_iOS: View {
 // MARK: Sura List
 private struct SuraList: View {
     @State private var suras:[Chapter] = .init()
-    @State private var navbarHidden:Bool = true
+    @State private var navbarHidden:Bool = false
     
     var body: some View {
         VStack {
@@ -122,7 +122,7 @@ private struct SuraList: View {
 }
 
 private struct MushafReaderDemo: View {
-	    @State private var navbarHidden: Bool = true
+	    @State private var navbarHidden: Bool = false
 
     var body: some View {
         MushafView(initialPage: 1, onPageTap: {

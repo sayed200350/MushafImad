@@ -146,30 +146,15 @@ public struct MushafView: View {
             }
         }
         .toolbar {
+            #if os(iOS) || os(visionOS)
             ToolbarItemGroup(placement: .topBarTrailing) {
-                if displayMode == .text {
-                    Menu {
-                        ForEach([16.0, 20.0, 24.0, 28.0, 32.0, 36.0], id: \.self) { size in
-                            Button {
-                                textFontSize = size
-                            } label: {
-                                if abs(textFontSize - size) < 0.5 {
-                                    Label("\(Int(size))pt", systemImage: "checkmark")
-                                } else {
-                                    Text("\(Int(size))pt")
-                                }
-                            }
-                        }
-                    } label: {
-                        Image(systemName: "textformat.size")
-                    }
-                }
-                Button {
-                    displayMode = (displayMode == .image) ? .text : .image
-                } label: {
-                    Image(systemName: displayMode == .image ? "text.justify.leading" : "book.pages")
-                }
+                toolbarButtons
             }
+            #else
+            ToolbarItemGroup(placement: .automatic) {
+                toolbarButtons
+            }
+            #endif
         }
         .onChange(of: playerViewModel.playbackState) { oldState, newState in
             // Clear highlighting when playback stops
@@ -201,6 +186,32 @@ public struct MushafView: View {
     }
 
     // MARK: - View Components
+    @ViewBuilder
+    private var toolbarButtons: some View {
+        if displayMode == .text {
+            Menu {
+                ForEach([16.0, 20.0, 24.0, 28.0, 32.0, 36.0], id: \.self) { size in
+                    Button {
+                        textFontSize = size
+                    } label: {
+                        if abs(textFontSize - size) < 0.5 {
+                            Label("\(Int(size))pt", systemImage: "checkmark")
+                        } else {
+                            Text("\(Int(size))pt")
+                        }
+                    }
+                }
+            } label: {
+                Image(systemName: "textformat.size")
+            }
+        }
+        Button {
+            displayMode = (displayMode == .image) ? .text : .image
+        } label: {
+            Image(systemName: displayMode == .image ? "text.justify.leading" : "book.pages")
+        }
+    }
+
     @ViewBuilder
     private var pageView: some View {
         let currentHighlight = playingVerse
