@@ -122,8 +122,15 @@ private struct SuraList: View {
 }
 
 private struct MushafReaderDemo: View {
+	    @State private var navbarHidden: Bool = true
+
     var body: some View {
-        MushafView(initialPage: 1)
+        MushafView(initialPage: 1, onPageTap: {
+                withAnimation {
+                    navbarHidden.toggle()
+                }
+            })
+            .toolbarVisibility(navbarHidden ? .hidden : .visible, for: .navigationBar)
             .navigationTitle("Reader")
             .navigationBarTitleDisplayMode(.inline)
     }
