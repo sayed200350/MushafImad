@@ -1,7 +1,7 @@
 import WidgetKit
 import SwiftUI
 
-@main
+// @main
 struct AyahOfTheDayWidget: Widget {
 
     let kind: String = "AyahOfTheDayWidget"
