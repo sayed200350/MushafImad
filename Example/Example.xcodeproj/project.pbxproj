@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		3F3825292F4E2E5D0096FE49 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3F3825282F4E2E5D0096FE49 /* WidgetKit.framework */; };
 		3F38252B2F4E2E5D0096FE49 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3F38252A2F4E2E5D0096FE49 /* SwiftUI.framework */; };
-		3F38253C2F4E2E5E0096FE49 /* AyahOfTheDayWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3F3825262F4E2E5D0096FE49 /* AyahOfTheDayWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); platformFilter = ios; }; };
+		3F38253C2F4E2E5E0096FE49 /* AyahOfTheDayWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3F3825262F4E2E5D0096FE49 /* AyahOfTheDayWidgetExtension.appex */; platformFilters = (ios, ); settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3F38254D2F4E31E10096FE49 /* MushafImad in Frameworks */ = {isa = PBXBuildFile; productRef = 3F38254C2F4E31E10096FE49 /* MushafImad */; };
 		F6ECB7962EC5414000C71679 /* MushafImad in Frameworks */ = {isa = PBXBuildFile; productRef = F6ECB7952EC5414000C71679 /* MushafImad */; };
 /* End PBXBuildFile section */
@@ -172,6 +172,7 @@
 				F6ECB7822EC540DD00C71679 /* Sources */,
 				F6ECB7832EC540DD00C71679 /* Frameworks */,
 				F6ECB7842EC540DD00C71679 /* Resources */,
+				3F38253D2F4E2E5E0096FE49 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
