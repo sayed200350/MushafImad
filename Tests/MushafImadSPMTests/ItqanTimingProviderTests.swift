@@ -5,7 +5,6 @@ import Testing
 @Suite(.serialized)
 struct ItqanTimingProviderTests {
     final class MockURLProtocol: URLProtocol, @unchecked Sendable {
-        @MainActor
         static var requestHandler: (@Sendable (URLRequest) throws -> (HTTPURLResponse, Data))?
 
         override static func canInit(with request: URLRequest) -> Bool { true }
@@ -30,7 +29,7 @@ struct ItqanTimingProviderTests {
         override func stopLoading() {}
     }
 
-    private func makeProvider(payload: Data) -> ItqanTimingProvider {
+    private func makeProvider(payload: Data) async -> ItqanTimingProvider {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [MockURLProtocol.self]
         let session = URLSession(configuration: configuration)
@@ -73,7 +72,7 @@ struct ItqanTimingProviderTests {
         }
         """.data(using: .utf8)!
 
-        let provider = makeProvider(payload: payload)
+        let provider = await makeProvider(payload: payload)
         let data = try await provider.fetchChapterData(for: 1001, surahId: 1)
 
         #expect(data.timings.count == 2)
@@ -87,7 +86,7 @@ struct ItqanTimingProviderTests {
         { "count": 0, "next": null, "previous": null, "results": [] }
         """.data(using: .utf8)!
 
-        let provider = makeProvider(payload: payload)
+        let provider = await makeProvider(payload: payload)
 
         await MainActor.run {
             MockURLProtocol.requestHandler = { request in
@@ -111,7 +110,7 @@ struct ItqanTimingProviderTests {
     }
 
     @Test func itqanProviderThrowsForNonItqanReciter() async {
-        let provider = makeProvider(payload: Data("{}".utf8))
+        let provider = await makeProvider(payload: Data("{}".utf8))
         await #expect(throws: TimingProviderError.self) {
             _ = try await provider.fetchChapterData(for: 5, surahId: 1)
         }
