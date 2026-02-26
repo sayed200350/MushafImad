@@ -451,6 +451,71 @@ public final class RealmService {
         
         return sajdaVerses
     }
+    
+    // MARK: - Tafseer Operations
+    
+    /// Gets a Tafseer by its identifier.
+    public func getTafseer(identifier: String) -> Tafseer? {
+        return realm?.objects(Tafseer.self).filter("identifier == %@", identifier).first?.freeze()
+    }
+    
+    /// Gets all downloaded Tafseer sources.
+    public func getAllTafseers() -> Results<Tafseer>? {
+        return realm?.objects(Tafseer.self).sorted(byKeyPath: "name")
+    }
+    
+    /// Gets the currently active Tafseer.
+    public func getActiveTafseer() -> Tafseer? {
+        return realm?.objects(Tafseer.self).filter("isActive == true").first?.freeze()
+    }
+    
+    /// Gets Tafseer text for a specific verse.
+    public func getVerseTafseer(tafseerId: String, chapterNumber: Int, verseNumber: Int) -> VerseTafseer? {
+        let identifier = VerseTafseer.makeIdentifier(
+            tafseerId: tafseerId,
+            chapterNumber: chapterNumber,
+            verseNumber: verseNumber
+        )
+        return realm?.objects(VerseTafseer.self).filter("identifier == %@", identifier).first?.freeze()
+    }
+    
+    /// Gets all Tafseer entries for a chapter.
+    public func getTafseerForChapter(tafseerId: String, chapterNumber: Int) -> [VerseTafseer] {
+        guard let realm = realm else { return [] }
+        let results = realm.objects(VerseTafseer.self)
+            .filter("tafseerId == %@ AND chapterNumber == %@", tafseerId, chapterNumber)
+            .sorted(byKeyPath: "verseNumber")
+        return Array(results.freeze())
+    }
+    
+    /// Checks if a Tafseer has been downloaded.
+    public func isTafseerDownloaded(identifier: String) -> Bool {
+        return realm?.objects(Tafseer.self).filter("identifier == %@ AND isDownloaded == true", identifier).first != nil
+    }
+    
+    /// Fetch all Tafseers asynchronously.
+    public func fetchAllTafseersAsync() async throws -> [Tafseer] {
+        try initialize()
+        guard let configuration else {
+            throw NSError(domain: "RealmService", code: 3,
+                          userInfo: [NSLocalizedDescriptionKey: "Realm configuration unavailable"])
+        }
+        return try await withCheckedThrowingContinuation { continuation in
+            let config = configuration
+            DispatchQueue.global(qos: .userInitiated).async {
+                autoreleasepool {
+                    do {
+                        let realm = try Realm(configuration: config)
+                        let results = realm.objects(Tafseer.self).sorted(byKeyPath: "name")
+                        let frozen = Array(results.freeze())
+                        continuation.resume(returning: frozen)
+                    } catch {
+                        continuation.resume(throwing: error)
+                    }
+                }
+            }
+        }
+    }
 }
 
 // MARK: - Supporting Types

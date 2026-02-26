@@ -30,7 +30,8 @@ let package = Package(
             resources: [
                 .process("Media.xcassets"),
                 .process("Resources"),
-                .copy("quran-images")
+                .copy("quran-images"),
+                .process("Resources/Res/tafseer")
             ]
         ),
         .testTarget(
