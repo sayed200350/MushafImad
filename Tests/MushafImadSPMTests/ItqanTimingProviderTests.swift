@@ -5,6 +5,7 @@ import Testing
 @Suite(.serialized)
 struct ItqanTimingProviderTests {
     final class MockURLProtocol: URLProtocol, @unchecked Sendable {
+        @MainActor
         static var requestHandler: (@Sendable (URLRequest) throws -> (HTTPURLResponse, Data))?
 
         override static func canInit(with request: URLRequest) -> Bool { true }
