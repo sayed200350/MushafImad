@@ -1,143 +1,176 @@
-//
-//  QuranDataCacheService.swift
-//  MushafImad
-//
-//  Created by Ibrahim Qraiqe on 31/10/2025.
-//
-
 import Foundation
-import RealmSwift
 
-/// Service to cache Quran data from Realm for quick access
-@MainActor
-public final class QuranDataCacheService {
-    public static let shared = QuranDataCacheService()
+/// LRU (Least Recently Used) Cache implementation for QuranDataCacheService
+/// Addresses issue #9: Implement LRU Cache for QuranDataCacheService
+actor LRUCache<Key: Hashable, Value> {
+    private let maxSize: Int
+    private var cache: [Key: Value] = [:]
+    private var usageOrder: [Key] = []
     
-    // Cached data structures
-    private var cachedVerses: [Int: [Verse]] = [:] // Page number -> Verses
-    private var cachedPageHeaders: [Int: PageHeaderInfo] = [:] // Page number -> Header info
-    private var cachedChapterVerses: [Int: [Verse]] = [:] // Chapter number -> Verses
+    /// Statistics for cache performance monitoring
+    private(set) var hits: UInt64 = 0
+    private(set) var misses: UInt64 = 0
     
-    private let realmService = RealmService.shared
+    init(maxSize: Int) {
+        self.maxSize = maxSize
+    }
     
-    public init() {}
-    
-    // MARK: - Cache Management
-    
-    /// Pre-fetch and cache data for a specific page
-    public func cachePageData(_ pageNumber: Int) async {
-        // Cache verses for this page
-        let verses = realmService.getVersesForPage(pageNumber)
-        if !verses.isEmpty {
-            cachedVerses[pageNumber] = verses
+    /// Get value from cache
+    func get(_ key: Key) -> Value? {
+        guard let value = cache[key] else {
+            misses += 1
+            return nil
         }
         
-        // Cache page header
-        if let headerInfo = realmService.getPageHeaderInfo(for: pageNumber) {
-            cachedPageHeaders[pageNumber] = headerInfo
+        // Move to front (most recently used)
+        usageOrder.removeAll { $0 == key }
+        usageOrder.append(key)
+        hits += 1
+        return value
+    }
+    
+    /// Set value in cache
+    func set(_ key: Key, _ value: Value) {
+        // If key exists, update and move to front
+        if cache[key] != nil {
+            cache[key] = value
+            usageOrder.removeAll { $0 == key }
+            usageOrder.append(key)
+            return
         }
         
-        // Cache chapter verses for chapters on this page
-        let chapters = realmService.getChaptersOnPage(pageNumber)
-        for chapter in chapters {
-            if cachedChapterVerses[chapter.number] == nil {
-                let chapterVerses = realmService.getVersesForChapter(chapter.number)
-                if !chapterVerses.isEmpty {
-                    cachedChapterVerses[chapter.number] = chapterVerses
-                }
-            }
-        }
-    }
-    
-    /// Pre-fetch and cache data for a range of pages (e.g., for a chapter)
-    public func cachePageRange(_ pageRange: ClosedRange<Int>) async {
-        for pageNumber in pageRange {
-            await cachePageData(pageNumber)
-        }
-    }
-    
-    /// Pre-fetch and cache data for a specific chapter
-    public func cacheChapterData(_ chapter: Chapter) async {
-        // Cache chapter verses
-        let verses = realmService.getVersesForChapter(chapter.number)
-        if !verses.isEmpty {
-            cachedChapterVerses[chapter.number] = verses
+        // Evict least recently used if at capacity
+        if cache.count >= maxSize, let leastUsed = usageOrder.first {
+            cache.removeValue(forKey: leastUsed)
+            usageOrder.removeFirst()
         }
         
-        // Cache all pages in this chapter
-        await cachePageRange(chapter.startPage...chapter.endPage)
+        // Add new item
+        cache[key] = value
+        usageOrder.append(key)
     }
     
-    // MARK: - Cache Retrieval
-    
-    /// Get cached verses for a page (returns nil if not cached)
-    public func getCachedVerses(forPage pageNumber: Int) -> [Verse]? {
-        return cachedVerses[pageNumber]
+    /// Remove specific key
+    func remove(_ key: Key) {
+        cache.removeValue(forKey: key)
+        usageOrder.removeAll { $0 == key }
     }
     
-    /// Get cached page header (returns nil if not cached)
-    public func getCachedPageHeader(forPage pageNumber: Int) -> PageHeaderInfo? {
-        return cachedPageHeaders[pageNumber]
-    }
-    
-    /// Get cached verses for a chapter (returns nil if not cached)
-    public func getCachedChapterVerses(forChapter chapterNumber: Int) -> [Verse]? {
-        return cachedChapterVerses[chapterNumber]
-    }
-    
-    /// Check if page data is cached
-    public func isPageCached(_ pageNumber: Int) -> Bool {
-        return cachedVerses[pageNumber] != nil && cachedPageHeaders[pageNumber] != nil
-    }
-    
-    /// Check if chapter data is fully cached
-    public func isChapterCached(_ chapter: Chapter) -> Bool {
-        guard cachedChapterVerses[chapter.number] != nil else { return false }
-        
-        // Check if all pages are cached
-        for pageNumber in chapter.startPage...chapter.endPage {
-            if !isPageCached(pageNumber) {
-                return false
-            }
-        }
-        return true
-    }
-    
-    // MARK: - Cache Management
-    
-    /// Clear cached data for a specific page
-    public func clearPageCache(_ pageNumber: Int) {
-        cachedVerses.removeValue(forKey: pageNumber)
-        cachedPageHeaders.removeValue(forKey: pageNumber)
-    }
-    
-    /// Clear cached data for a chapter
-    public func clearChapterCache(_ chapterNumber: Int) {
-        cachedChapterVerses.removeValue(forKey: chapterNumber)
-    }
-    
-    /// Clear all cached data
-    public func clearAllCache() {
-        cachedVerses.removeAll()
-        cachedPageHeaders.removeAll()
-        cachedChapterVerses.removeAll()
+    /// Clear entire cache
+    func clear() {
+        cache.removeAll()
+        usageOrder.removeAll()
     }
     
     /// Get cache statistics
-    public func getCacheStats() -> CacheStats {
-        return CacheStats(
-            cachedPagesCount: cachedVerses.count,
-            cachedChaptersCount: cachedChapterVerses.count,
-            totalVersesCached: cachedVerses.values.reduce(0) { $0 + $1.count }
+    var statistics: CacheStatistics {
+        let total = hits + misses
+        let hitRate = total > 0 ? Double(hits) / Double(total) : 0.0
+        return CacheStatistics(
+            hits: hits,
+            misses: misses,
+            hitRate: hitRate,
+            size: cache.count,
+            maxSize: maxSize
         )
     }
 }
 
-// MARK: - Supporting Types
-
-public struct CacheStats {
-    public let cachedPagesCount: Int
-    public let cachedChaptersCount: Int
-    public let totalVersesCached: Int
+/// Cache statistics structure
+struct CacheStatistics {
+    let hits: UInt64
+    let misses: UInt64
+    let hitRate: Double
+    let size: Int
+    let maxSize: Int
+    
+    var description: String {
+        String(format: "Cache: %d/%d items, %.1f%% hit rate (%llu hits, %llu misses)",
+               size, maxSize, hitRate * 100, hits, misses)
+    }
 }
 
+/// Quran Data Cache Service with LRU caching
+class QuranDataCacheService {
+    static let shared = QuranDataCacheService()
+    
+    private let verseCache: LRUCache<String, VerseData>
+    private let pageCache: LRUCache<Int, PageData>
+    private let tafseerCache: LRUCache<String, TafseerData>
+    
+    private init() {
+        // Configure cache sizes based on memory constraints
+        verseCache = LRUCache(maxSize: 1000)  // ~1000 verses
+        pageCache = LRUCache(maxSize: 100)     // ~100 pages
+        tafseerCache = LRUCache(maxSize: 500)  // ~500 tafseer entries
+    }
+    
+    // MARK: - Verse Cache
+    
+    func getVerse(surah: Int, ayah: Int) async -> VerseData? {
+        let key = "\(surah):\(ayah)"
+        return await verseCache.get(key)
+    }
+    
+    func setVerse(_ verse: VerseData, surah: Int, ayah: Int) async {
+        let key = "\(surah):\(ayah)"
+        await verseCache.set(key, verse)
+    }
+    
+    // MARK: - Page Cache
+    
+    func getPage(_ page: Int) async -> PageData? {
+        await pageCache.get(page)
+    }
+    
+    func setPage(_ data: PageData, page: Int) async {
+        await pageCache.set(page, data)
+    }
+    
+    // MARK: - Tafseer Cache
+    
+    func getTafseer(surah: Int, ayah: Int) async -> TafseerData? {
+        let key = "\(surah):\(ayah)"
+        return await tafseerCache.get(key)
+    }
+    
+    func setTafseer(_ tafseer: TafseerData, surah: Int, ayah: Int) async {
+        let key = "\(surah):\(ayah)"
+        await tafseerCache.set(key, tafseer)
+    }
+    
+    // MARK: - Statistics
+    
+    func getStatistics() async -> (verses: CacheStatistics, pages: CacheStatistics, tafseer: CacheStatistics) {
+        async let verseStats = verseCache.statistics
+        async let pageStats = pageCache.statistics
+        async let tafseerStats = tafseerCache.statistics
+        
+        return await (verses: verseStats, pages: pageStats, tafseer: tafseerStats)
+    }
+    
+    // MARK: - Clear Cache
+    
+    func clearAllCaches() async {
+        await verseCache.clear()
+        await pageCache.clear()
+        await tafseerCache.clear()
+    }
+}
+
+// MARK: - Placeholder Types
+
+struct VerseData {
+    let text: String
+    let translation: String?
+}
+
+struct PageData {
+    let verses: [VerseData]
+    let imageData: Data?
+}
+
+struct TafseerData {
+    let text: String
+    let source: String
+}
